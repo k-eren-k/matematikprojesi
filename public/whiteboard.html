@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Whiteboard</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.1/socket.io.js"></script>
+  <style>
+    body { margin: 0; overflow: hidden; font-family: Arial; }
+    .toolbar { padding: 10px; background: #f5f5f5; display: flex; align-items: center; gap: 10px; }
+    .color-picker { width: 50px; height: 30px; padding: 0; border: none; }
+    .size-picker { width: 100px; }
+    button { padding: 8px 15px; border: none; border-radius: 4px; background: #1a73e8; color: white; cursor: pointer; }
+    canvas { border: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <input type="color" id="colorPicker" class="color-picker" value="#000000">
+    <input type="range" id="sizePicker" min="1" max="20" value="2" class="size-picker">
+    <button onclick="clearCanvas()">Clear</button>
+    <span id="userInfo"></span>
+  </div>
+  <canvas id="whiteboard"></canvas>
+  <script>
+    if (!localStorage.getItem('token')) {
+      window.location.href = 'index.html';
+      throw new Error('Not authenticated');
+    }
+
+    const socket = io();
+    const canvas = document.getElementById('whiteboard');
+    const ctx = canvas.getContext('2d');
+    const colorPicker = document.getElementById('colorPicker');
+    const sizePicker = document.getElementById('sizePicker');
+    let drawing = false;
+    
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight - document.querySelector('.toolbar').offsetHeight;
+    }
+    
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    function draw(e) {
+      if (!drawing) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      ctx.lineWidth = sizePicker.value;
+      ctx.strokeStyle = colorPicker.value;
+      ctx.lineCap = 'round';
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      
+      socket.emit('draw', { x, y, color: colorPicker.value, size: sizePicker.value });
+    }
+
+    function startDrawing(e) {
+      drawing = true;
+      const rect = canvas.getBoundingClientRect();
+      ctx.beginPath();
+      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    }
+
+    function stopDrawing() {
+      drawing = false;
+      ctx.beginPath();
+    }
+
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      socket.emit('clear');
+    }
+
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+    
+    socket.on('draw', (data) => {
+      ctx.lineWidth = data.size;
+      ctx.strokeStyle = data.color;
+      ctx.lineCap = 'round';
+      ctx.lineTo(data.x, data.y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(data.x, data.y);
+    });
+
+    socket.on('clear', () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
+  </script>
+</body>
+</html>
