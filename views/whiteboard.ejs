@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Whiteboard</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.1/socket.io.js"></script>
+  <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Daha modern bir font */
+      background-color: #f8f8f8; /* Hafif gri tonu */
+    }
+
+    .toolbar {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      padding: 15px;
+      background: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Hafif gölge */
+      z-index: 10; /* Canvasın üstünde olması için */
+    }
+
+    .color-picker-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      width: 60px;
+    }
+
+    .color-picker {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border: 1px solid #ccc;
+      margin-bottom: 6px;
+      cursor: pointer;
+      border-radius: 5px; /* Yuvarlatılmış kenarlar */
+      transition: transform 0.2s ease; /* Büyüme efekti için */
+    }
+
+    .color-picker:hover {
+      transform: scale(1.1); /* Hafif büyüme efekti */
+    }
+
+    .size-picker {
+      width: 80%;
+      accent-color: #4CAF50; /* Yeşil renk */
+    }
+
+    button {
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: white;
+      color: #333;
+      cursor: pointer;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #e0e0e0;
+      transform: translateY(-2px); /* Hafif yukarı kayma efekti */
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    canvas {
+      background-color: white;
+      cursor: crosshair;
+    }
+
+    .tool-button {
+      background-color: transparent;
+      color: #333;
+      margin-bottom: 0;
+    }
+
+    .tool-button.active {
+      background-color: #4CAF50;
+      color: white;
+    }
+    
+    .tool-button.active i{
+        color: white;
+    }
+
+    .top-right-buttons {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      z-index: 10;
+    }
+
+    .user-info {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .top-left-buttons {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      z-index: 10;
+    }
+
+    .icon {
+      font-size: 22px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-left-buttons">
+    <button id="undoButton" title="Undo"><i class="fas fa-undo icon"></i></button>
+    <button id="redoButton" title="Redo"><i class="fas fa-redo icon"></i></button>
+  </div>
+  <div class="top-right-buttons">
+    <span id="userInfo" class="user-info"></span>
+    <button id="settingsButton" title="Settings"><i class="fas fa-cog icon"></i></button>
+  </div>
+  <div class="toolbar">
+    <button id="penButton" class="tool-button active" title="Pen"><i class="fas fa-pen icon"></i></button>
+    <button id="eraserButton" class="tool-button" title="Eraser"><i class="fas fa-eraser icon"></i></button>
+    <button id="moveButton" class="tool-button" title="Move"><i class="fas fa-arrows-alt icon"></i></button>
+    <button id="selectButton" class="tool-button" title="Select"><i class="fas fa-vector-square icon"></i></button>
+    <div class="color-picker-container">
+      <div class="color-picker" style="background-color: #000000;" data-color="#000000"></div>
+      <div class="color-picker" style="background-color: #ff0000;" data-color="#ff0000"></div>
+      <div class="color-picker" style="background-color: #ffff00;" data-color="#ffff00"></div>
+      <div class="color-picker" style="background-color: #00ff00;" data-color="#00ff00"></div>
+      <div class="color-picker" style="background-color: #00ffff;" data-color="#00ffff"></div>
+      <div class="color-picker" style="background-color: #0000ff;" data-color="#0000ff"></div>
+      <div class="color-picker" style="background-color: #ff00ff;" data-color="#ff00ff"></div>
+      <div class="color-picker" style="background-color: #ffffff;" data-color="#ffffff"></div>
+    </div>
+    <input type="range" id="sizePicker" min="1" max="50" value="5" class="size-picker">
+    <button id="textButton" title="Add Text"><i class="fas fa-font icon"></i></button>
+    <button id="shapesButton" title="Shapes"><i class="fas fa-shapes icon"></i></button>
+    <button id="reactionsButton" title="Reactions"><i class="fas fa-smile icon"></i></button>
+    <button id="clearButton" title="Clear"><i class="fas fa-trash icon"></i></button>
+    <button id="exportButton" title="Export"><i class="fas fa-file-export icon"></i></button>
+  </div>
+  <canvas id="whiteboard"></canvas>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.10.0/dist/tf.min.js"></script>
+  <script>
+    if (!localStorage.getItem('token')) {
+      window.location.href = 'index.html';
+      throw new Error('Not authenticated');
+    }
+
+    const socket = io();
+    const canvas = document.getElementById('whiteboard');
+    const ctx = canvas.getContext('2d');
+    const sizePicker = document.getElementById('sizePicker');
+    const penButton = document.getElementById('penButton');
+    const eraserButton = document.getElementById('eraserButton');
+    const moveButton = document.getElementById('moveButton');
+    const selectButton = document.getElementById('selectButton');
+    const clearButton = document.getElementById('clearButton');
+    const undoButton = document.getElementById('undoButton');
+    const redoButton = document.getElementById('redoButton');
+    const textButton = document.getElementById('textButton');
+    const shapesButton = document.getElementById('shapesButton');
+    const reactionsButton = document.getElementById('reactionsButton');
+    const settingsButton = document.getElementById('settingsButton');
+    const exportButton = document.getElementById('exportButton');
+
+    let drawing = false;
+    let isEraser = false;
+    let isMove = false;
+    let isSelect = false;
+    let lastX = 0;
+    let lastY = 0;
+    let lastDrawX = null;
+    let lastDrawY = null;
+    let currentColor = '#000000';
+    let drawPoints = [];
+    let styler;
+
+    // Sayfa yüklendiğinde modeli yükle
+    window.addEventListener('load', () => {
+      styler = ml5.styleTransfer('models/udnie', modelLoaded); // 'models/udnie' yerine kullanmak istediğiniz modelin yolunu yazın, örn: styleTransfer('path/to/model')
+    });
+
+    function modelLoaded() {
+      console.log('Model Loaded!');
+    }
+
+    // Anti-aliasing'i açıyoruz.
+    ctx.imageSmoothingEnabled = true;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    function draw(x, y, color, size, isEraser) {
+      if (lastDrawX === null || lastDrawY === null) {
+        lastDrawX = x;
+        lastDrawY = y;
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(lastDrawX, lastDrawY);
+      ctx.lineTo(x, y);
+      ctx.lineWidth = size;
+      ctx.strokeStyle = color;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      lastDrawX = x;
+      lastDrawY = y;
+    }
+
+    function startDrawing(e) {
+      if (isMove) {
+        canvas.style.cursor = 'grabbing';
+        lastX = e.clientX;
+        lastY = e.clientY;
+        return;
+      }
+      if(isSelect){
+        return;
+      }
+      drawing = true;
+      const rect = canvas.getBoundingClientRect();
+      lastDrawX = e.clientX - rect.left;
+      lastDrawY = e.clientY - rect.top;
+
+      draw(lastDrawX, lastDrawY, isEraser ? '#FFFFFF' : currentColor, sizePicker.value, isEraser);
+      drawPoints.push({ x: lastDrawX, y: lastDrawY });
+      socket.emit('draw', { x: lastDrawX, y: lastDrawY, color: isEraser ? '#FFFFFF' : currentColor, size: sizePicker.value, isEraser: isEraser });
+    }
+
+      async function stopDrawing() {
+        drawing = false;
+        if (isMove) {
+            canvas.style.cursor = 'grab';
+            return;
+        }
+        if (isSelect) {
+            return;
+        }
+
+        if (!isMove && !isSelect && styler && styler.ready) {
+            const simplifiedPoints = simplifyLine(drawPoints, 2);
+
+            // Önceki çizgiyi temizle
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Yumuşatılmış çizgiyi geçici bir canvasa çiz
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            const tempCtx = tempCanvas.getContext('2d');
+            for (let i = 0; i < simplifiedPoints.length; i++) {
+                tempCtx.beginPath();
+                if (i === 0) {
+                    tempCtx.moveTo(simplifiedPoints[i].x, simplifiedPoints[i].y);
+                } else {
+                    tempCtx.lineTo(simplifiedPoints[i].x, simplifiedPoints[i].y);
+                }
+                tempCtx.lineWidth = sizePicker.value;
+                tempCtx.strokeStyle = isEraser ? '#FFFFFF' : currentColor;
+                tempCtx.lineCap = 'round';
+                tempCtx.stroke();
+            }
+
+            // Stili uygula
+            try {
+                const result = await styler.transfer(tempCanvas);
+                // Sonucu ana canvasa çiz
+                ctx.drawImage(result, 0, 0);
+                socket.emit('image', { imageData: result.src, color: isEraser ? '#FFFFFF' : currentColor, size: sizePicker.value, isEraser: isEraser });
+            } catch (err) {
+                console.error('Stil uygulama hatası:', err);
+            }
+        }
+
+        drawPoints = [];
+        lastDrawX = null;
+        lastDrawY = null;
+    }
+
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      socket.emit('clear');
+    }
+
+    function handleMove(e) {
+      if (!isMove || !drawing) return;
+
+      const dx = e.clientX - lastX;
+      const dy = e.clientY - lastY;
+
+      window.scrollBy(-dx, -dy);
+
+      lastX = e.clientX;
+      lastY = e.clientY;
+    }
+
+    function handleDrawEvent(e) {
+      if (!drawing || isMove || isSelect) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      draw(x, y, isEraser ? '#FFFFFF' : currentColor, sizePicker.value, isEraser);
+      drawPoints.push({ x: x, y: y });
+      socket.emit('draw', { x, y, color: isEraser ? '#FFFFFF' : currentColor, size: sizePicker.value, isEraser: isEraser });
+    }
+    
+    function activateToolButton(button) {
+      const toolButtons = [penButton, eraserButton, moveButton, selectButton];
+      toolButtons.forEach(b => b.classList.remove('active'));
+      button.classList.add('active');
+    }
+
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+    canvas.addEventListener('mousemove', handleMove);
+
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (!drawing || isMove || isSelect) return;
+      window.requestAnimationFrame(() => handleDrawEvent(e));
+    });
+
+    socket.on('draw', (data) => {
+      window.requestAnimationFrame(() => {
+        draw(data.x, data.y, data.color, data.size, data.isEraser);
+      });
+    });
+
+    socket.on('clear', () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
+
+    socket.on('image', (data) => {
+        window.requestAnimationFrame(() => {
+            const img = new Image();
+            img.onload = () => {
+                ctx.drawImage(img, 0, 0);
+            };
+            img.src = data.imageData;
+        });
+    });
+
+    penButton.addEventListener('click', () => {
+      isEraser = false;
+      isMove = false;
+      isSelect = false;
+      canvas.style.cursor = 'default';
+      activateToolButton(penButton);
+    });
+
+    eraserButton.addEventListener('click', () => {
+      isEraser = true;
+      isMove = false;
+      isSelect = false;
+      canvas.style.cursor = 'crosshair';
+      activateToolButton(eraserButton);
+    });
+
+    moveButton.addEventListener('click', () => {
+      isMove = true;
+      isEraser = false;
+      isSelect = false;
+      canvas.style.cursor = 'grab';
+      drawing = false;
+      activateToolButton(moveButton);
+    });
+
+    selectButton.addEventListener('click', () => {
+      isSelect = true;
+      isMove = false;
+      isEraser = false;
+      canvas.style.cursor = 'default';
+      drawing = false;
+      activateToolButton(selectButton);
+    });
+
+    clearButton.addEventListener('click', clearCanvas);
+
+    document.querySelectorAll('.color-picker').forEach(picker => {
+      picker.addEventListener('click', () => {
+        currentColor = picker.dataset.color;
+      });
+    });
+
+    // Placeholder functions for other buttons
+    undoButton.addEventListener('click', () => console.log('Undo'));
+    redoButton.addEventListener('click', () => console.log('Redo'));
+    textButton.addEventListener('click', () => console.log('Add Text'));
+    shapesButton.addEventListener('click', () => console.log('Shapes'));
+    reactionsButton.addEventListener('click', () => console.log('Reactions'));
+    settingsButton.addEventListener('click', () => console.log('Settings'));
+    exportButton.addEventListener('click', () => console.log('Export'));
+
+// Get user info from local storage and display
+const userInfo = document.getElementById('userInfo');
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user) {
+      userInfo.textContent = user.name;
+    }
+
+    // Ramer-Douglas-Peucker Algoritması
+    function simplifyLine(points, tolerance) {
+        if (points.length <= 2) {
+            return points;
+        }
+
+        function perpendicularDistance(pt, lineStart, lineEnd) {
+            let dx = lineEnd.x - lineStart.x;
+            let dy = lineEnd.y - lineStart.y;
+
+            if ((dx === 0) && (dy === 0)) {
+                dx = pt.x - lineStart.x;
+                dy = pt.y - lineStart.y;
+                return Math.sqrt(dx * dx + dy * dy);
+            }
+
+            let t = ((pt.x - lineStart.x) * dx + (pt.y - lineStart.y) * dy) / (dx * dx + dy * dy);
+
+            if (t < 0) {
+                dx = pt.x - lineStart.x;
+                dy = pt.y - lineStart.y;
+            } else if (t > 1) {
+                dx = pt.x - lineEnd.x;
+                dy = pt.y - lineEnd.y;
+            } else {
+                let closestX = lineStart.x + t * dx;
+                let closestY = lineStart.y + t * dy;
+                dx = pt.x - closestX;
+                dy = pt.y - closestY;
+            }
+
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        function douglasPeucker(points, tolerance) {
+            if (points.length <= 2) {
+                return points;
+            }
+
+            let maxDistance = 0;
+            let index = 0;
+            const lineStart = points[0];
+            const lineEnd = points[points.length - 1];
+
+            for (let i = 1; i < points.length - 1; i++) {
+                let distance = perpendicularDistance(points[i], lineStart, lineEnd);
+                if (distance > maxDistance) {
+                    maxDistance = distance;
+                    index = i;
+                }
+            }
+
+            let result = [];
+            if (maxDistance > tolerance) {
+                let recResults1 = douglasPeucker(points.slice(0, index + 1), tolerance);
+                let recResults2 = douglasPeucker(points.slice(index), tolerance);
+                result = recResults1.slice(0, -1).concat(recResults2);
+            } else {
+                result = [lineStart, lineEnd];
+            }
+
+            return result;
+        }
+
+        let result = douglasPeucker(points, tolerance);
+        return result;
+    }
+  </script>
+</body>
+</html>

@@ -3,18 +3,19 @@
     "version": "1.0.0",
     "main": "server.js",
     "scripts": {
-      "start": "node server.js",
-      "dev": "nodemon server.js"
+        "start": "node server.js",
+        "dev": "nodemon server.js"
     },
     "dependencies": {
-      "bcrypt": "^5.1.1",
-      "express": "^4.21.2",
-      "jsonwebtoken": "^9.0.2",
-      "mongoose": "^8.9.6",
-      "path": "^0.12.7",
-      "socket.io": "^4.8.1"
+        "bcrypt": "^5.1.1",
+        "express": "^4.21.2",
+        "jsonwebtoken": "^9.0.2",
+        "mongoose": "^8.9.6",
+        "nodemailer": "^6.10.0",
+        "path": "^0.12.7",
+        "socket.io": "^4.8.1"
     },
     "devDependencies": {
-      "nodemon": "^3.0.1"
+        "nodemon": "^3.0.1"
     }
-  }
+}

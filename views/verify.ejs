@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Email</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Verify Your Email</h2>
+        <p>Please enter the verification code sent to your email.</p>
+        <form id="verifyForm">
+            <input type="text" id="email" placeholder="Email" required>
+            <input type="text" id="verificationCode" placeholder="Verification Code" required>
+            <button type="submit">Verify</button>
+            <p id="verifyMessage"></p>
+            <button type="button" id="resendCode" style="display: none;">Resend Code</button>
+        </form>
+    </div>
+    <script src="/js/verify.js"></script>
+</body>
+</html>

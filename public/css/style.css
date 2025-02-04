@@ -1,0 +1,162 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Güncellenmiş font */
+    background-color: #f8f9fa; /* Hafif gri arka plan */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    background-color: #fff;
+    padding: 40px 50px; /* Artırılmış padding */
+    border-radius: 15px; /* Artırılmış border-radius */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Yumuşatılmış gölge */
+    width: 100%;
+    max-width: 500px; /* Artırılmış max-width */
+    transition: box-shadow 0.3s ease; /* Gölge geçişi */
+}
+
+.container:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15); /* Hover efekti */
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 30px; /* Artırılmış margin */
+    color: #343a40; /* Koyu gri renk */
+    font-size: 28px; /* Artırılmış font size */
+    font-weight: 600; /* Kalın font */
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    padding: 14px 18px; /* Artırılmış padding */
+    margin: 12px 0; /* Artırılmış margin */
+    border: 1px solid #ced4da; /* Hafif gri border */
+    border-radius: 8px; /* Artırılmış border-radius */
+    font-size: 16px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Geçiş efekti */
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+    border-color: #80bdff; /* Odaklanıldığında mavi border */
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Odaklanıldığında gölge */
+    outline: none;
+}
+
+button[type="submit"],
+button[type="button"] {
+    background-color: #3498db; /* Mavi renk */
+    color: #fff;
+    border: none;
+    padding: 14px 24px; /* Artırılmış padding */
+    border-radius: 8px; /* Artırılmış border-radius */
+    font-size: 18px; /* Artırılmış font size */
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Geçiş efektleri */
+    margin-top: 15px; /* Artırılmış margin */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Hafif gölge */
+}
+
+button[type="submit"]:hover,
+button[type="button"]:hover {
+    background-color: #2980b9; /* Daha koyu mavi */
+    transform: translateY(-2px); /* Hafif yukarı hareket */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Artırılmış gölge */
+}
+
+button[type="submit"]:active,
+button[type="button"]:active {
+    transform: translateY(0); /* Tıklandığında eski konumuna dön */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Azaltılmış gölge */
+}
+
+p {
+    text-align: center;
+    margin-top: 25px; /* Artırılmış margin */
+    font-size: 15px; /* Artırılmış font size */
+    color: #555; /* Gri renk */
+}
+
+#registerMessage,
+#verifyMessage,
+#loginMessage {
+    color: #dc3545; /* Kırmızı renk */
+    text-align: center;
+    margin-top: 12px; /* Azaltılmış margin */
+    font-size: 15px; /* Artırılmış font size */
+    font-weight: 500;
+}
+
+a {
+    color: #3498db; /* Mavi renk */
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #2980b9; /* Daha koyu mavi */
+    text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 500px) {
+    .container {
+        padding: 30px 40px; /* Azaltılmış padding */
+    }
+
+    h2 {
+        font-size: 24px; /* Azaltılmış font size */
+        margin-bottom: 25px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    button[type="submit"],
+    button[type="button"] {
+        font-size: 16px; /* Azaltılmış font size */
+        padding: 12px 18px;
+    }
+    p{
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 400px) {
+    .container {
+        padding: 25px 30px; /* Azaltılmış padding */
+    }
+
+    h2 {
+        font-size: 22px;
+        margin-bottom: 20px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    button[type="submit"],
+    button[type="button"] {
+        font-size: 15px;
+        padding: 10px 15px;
+    }
+    p{
+        font-size: 12px;
+    }
+}
