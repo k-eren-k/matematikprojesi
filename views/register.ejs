@@ -1,26 +1,383 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
-    <link rel="stylesheet" href="/css/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+        /* Önceki stiller (yukarıdaki tüm stiller buraya gelecek) */
+        body {
+            font-family: sans-serif;
+            background-color: #f3f0ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .form-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 410px;
+            /* Giriş Animasyonu */
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="password"],
+        .form-group input[type="tel"],
+        .form-group input[type="date"],
+        .form-group select
+         {
+            width: calc(100% - 0px);
+            height: 45px;
+            border: 1px solid #E6E6E6;
+            border-radius: 7.5px;
+            box-sizing: border-box;
+            padding: 0 10px; /* Yatay padding */
+            transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Geçiş animasyonu */
+        }
+        .form-group input[type="date"]{
+              width: 90%;
+        }
+         .form-group input[type="date"] + button
+         {
+           width: 10%;
+         }
+
+
+        /* Input Focus Animasyonu */
+        .form-group input[type="text"]:focus,
+        .form-group input[type="email"]:focus,
+        .form-group input[type="password"]:focus,
+        .form-group input[type="tel"]:focus,
+        .form-group input[type="date"]:focus,
+        .form-group select:focus
+        {
+            border-color: #6c63ff; /* Daha belirgin bir mor renk */
+            outline: none;
+            box-shadow: 0 0 5px rgba(108, 99, 255, 0.5); /* Daha belirgin bir gölge */
+        }
+
+        .form-group input[type="radio"] {
+           margin-right:5px;
+        }
+        .form-group label:has(input[type="radio"]){
+           display:inline-block;
+           margin-right:15px;
+
+        }
+       .error-message {
+           color: rgb(255, 93, 93);
+           margin-bottom: 15px;
+           font-size: 15px;
+           cursor: pointer;
+           padding: 10px;
+           border: 1px solid rgba(255, 0, 0, 0.548);
+           border-radius: 7.5px;
+           background-color: #ffe6e6;
+             /* Hata Mesajı Animasyonu */
+           animation: fadeIn 0.3s ease-out;
+       }
+
+       .error-message:hover{
+        color: rgb(255, 52, 52);
+      }
+
+      .submit-button-container {
+            position: relative;
+            display: inline-block;
+
+        }
+
+
+        .submit-button {
+            background-color: #6c63ff;
+            color: white;
+            padding: 15px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+             position: relative;
+              z-index: 1;
+            /* Buton Hover Animasyonu */
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+         .submit-button-container:has(> .submit-button:disabled) > .submit-button{
+             opacity: 0.5;
+              cursor: not-allowed;
+         }
+
+
+        /* Buton Hover Animasyonu */
+        .submit-button:hover {
+            background-color: #5649e6;
+            transform: scale(1.05); /* Hafif büyütme */
+        }
+
+         .alert-message {
+            position: absolute;
+            bottom: -30px;
+            right: 0;
+            padding: 5px 10px;
+            background-color: white;
+            border: 2px solid red;
+            border-radius: 4px;
+            color: red;
+            font-size: 12px;
+            display: none;
+            z-index: 2;
+             /* Uyarı Mesajı Animasyonu */
+            animation: slideIn 0.3s ease-out;
+
+        }
+
+         /* Uyarı Mesajı Animasyonu */
+        @keyframes slideIn {
+            from { transform: translateY(10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+          from { transform: translateY(0); opacity: 1; }
+          to { transform: translateY(10px); opacity: 0; }
+        }
+
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .login-link a {
+            color: #6c63ff;
+            text-decoration: none;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+          .form-group select {
+              appearance: none;
+              -webkit-appearance: none;
+              -moz-appearance: none;
+               background-image: url('data:image/svg+xml;utf8,<svg fill="%23999" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+               background-repeat: no-repeat;
+                background-position: right 10px center;
+               padding-right: 30px;
+          }
+
+        /* Progress bar stilleri */
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            margin-top: 5px;
+            overflow: hidden; /* Taşmayı gizle */
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            /* Şifre Gücü Animasyonu (daha yumuşak) */
+            transition: width 0.6s ease;
+        }
+
+        .progress-bar.weak {
+            background-color: #f44336;
+        }
+
+        .progress-bar.medium {
+            background-color: #ff9800;
+        }
+
+        .progress-bar.strong {
+            background-color: #4CAF50;
+        }
+
+        /* Geçersiz Input Animasyonu */
+        .invalid-input {
+          animation: shake 0.3s ease-in-out;
+          border-color: red !important; /* Önemli: Diğer border stillerini geçersiz kıl */
+        }
+
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25%, 75% { transform: translateX(-5px); }
+          50% { transform: translateX(5px); }
+        }
+
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Register</h2>
-        <form id="registerForm">
-            <input type="text" id="firstName" placeholder="First Name" required>
-            <input type="text" id="lastName" placeholder="Last Name" required>
-            <input type="text" id="username" placeholder="Username" required>
-            <input type="email" id="email" placeholder="Email" required>
-            <input type="password" id="password" placeholder="Password" required>
-            <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
-            <button type="submit">Register</button>
-            <p id="registerMessage"></p>
+    <div class="form-container">
+        <h2>Registration Form</h2>
+
+        <% if (locals.error) { %>
+           <div class="error-message">
+               <%= error %>
+           </div>
+       <% } %>
+
+        <form action="/register" method="POST" id="registrationForm">
+            <div class="form-group">
+                <label for="username">Full Name</label>
+                <input type="text" id="username" name="username">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password">
+                <div class="progress-container">
+                    <div class="progress-bar" id="password-strength"></div>
+                </div>
+            </div>
+          <div class="form-group">
+            <label for="confirm-password">Password Confirm</label>
+            <input type="password" id="confirm-password" name="confirm-password">
+        </div>
+         <div class="submit-button-container">
+                <button type="submit" class="submit-button" >Submit</button>
+                 <span class="alert-message" id="alertMessage">Please fill in all fields.</span>
+         </div>
+
         </form>
-        <p>Already have an account? <a href="login.html">Login</a></p>
+
+        <p class="login-link">
+            Already have an account? <a href="/login">Login</a>
+        </p>
     </div>
-    <script src="/js/register.js"></script>
+
+    <script>
+        const passwordInput = document.getElementById('password');
+        const strengthBar = document.getElementById('password-strength');
+        const form = document.getElementById('registrationForm');
+        const submitButton = document.querySelector('.submit-button');
+        const alertMessage = document.getElementById('alertMessage');
+        const allInputs = form.querySelectorAll('input');
+
+
+        // Şifre gücü hesaplama (önceki kod)
+        passwordInput.addEventListener('input', () => {
+            const password = passwordInput.value;
+            const strength = calculatePasswordStrength(password);
+            updateStrengthBar(strength);
+              checkFormValidity();
+        });
+
+        function calculatePasswordStrength(password) {
+            let strength = 0;
+            if (password.length >= 8) { strength += 1; }
+            if (/[A-Z]/.test(password)) { strength += 1;}
+            if (/[a-z]/.test(password)) { strength += 1; }
+            if (/[0-9]/.test(password)) { strength += 1;}
+            if (/[^A-Za-z0-9]/.test(password)) {strength += 1; }
+            return strength;
+        }
+
+        function updateStrengthBar(strength) {
+          strengthBar.style.width = (strength * 20) + '%';
+            strengthBar.classList.remove('weak', 'medium', 'strong');
+            if (strength <= 1) {
+                strengthBar.classList.add('weak');
+                 strengthBar.style.width = (strength * 15) + '%';
+
+            } else if (strength <= 3) {
+                strengthBar.classList.add('medium');
+                 strengthBar.style.width = (strength * 17) + '%';
+            }
+            else {
+                strengthBar.classList.add('strong');
+            }
+        }
+
+
+        // Form doğrulama, uyarı mesajı ve geçersiz input animasyonu
+        form.addEventListener('submit', (event) => {
+            let isFormValid = true;
+            allInputs.forEach(input => {
+                if (input.value.trim() === '') {
+                    isFormValid = false;
+                    input.classList.add('invalid-input'); // Geçersiz input'a sınıf ekle
+                } else {
+                    input.classList.remove('invalid-input'); // Geçerli input'tan sınıfı kaldır
+                }
+            });
+
+
+            if (!isFormValid) {
+                event.preventDefault();
+                alertMessage.style.animation = 'slideIn 0.3s ease-out'; //Animasyonu tekrar başlat
+                alertMessage.style.display = 'block';
+
+                // 3 saniye sonra animasyonu sıfırla ve gizle
+                setTimeout(() => {
+                    alertMessage.style.animation = 'slideOut 0.3s ease-out';
+                      setTimeout(()=> {
+                        alertMessage.style.display = 'none';
+                      }, 300); // slideOut animasyonunun bitmesini bekle
+
+                }, 3000);
+            }
+        });
+
+
+         //inputlara yazmaya başlayınca disabled kalksın hepsi dolunca aktif olsun.
+        function checkFormValidity() {
+            let allFilled = true;
+            allInputs.forEach(input => {
+                if (input.value.trim() === '') {
+                    allFilled = false;
+                }
+            });
+
+            submitButton.disabled = !allFilled;
+        }
+          allInputs.forEach(input => {
+              input.addEventListener('input', checkFormValidity);
+
+              // Geçersiz input animasyonunu temizle (input'a tekrar yazıldığında)
+              input.addEventListener('input', () => {
+                input.classList.remove('invalid-input');
+              });
+
+          });
+
+          checkFormValidity(); // Sayfa yüklendiğinde de kontrol et
+
+
+    </script>
 </body>
 </html>
