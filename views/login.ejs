@@ -1,22 +1,475 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="/css/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login / Register</title>
+  <style>
+    /* Temel Stiller ve Sıfırlama */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: sans-serif;
+        background-color: #f3f0ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
+    }
+
+    /* Form Konteyner */
+    .form-container {
+        background-color: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        width: 90%;  /* Mobil için daha geniş */
+        max-width: 410px; /* Maksimum genişliği koru */
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-container h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        color: #555;
+    }
+
+    /* Input ve Select Stilleri */
+   .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="password"],
+    .form-group input[type="tel"],
+    .form-group input[type="date"],
+    .form-group select {
+        width: 100%; /* Tam genişlik */
+        height: 45px;
+        border: 1px solid #E6E6E6;
+        border-radius: 7.5px;
+        padding: 0 10px;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        font-size: 16px; /* Yazı boyutunu büyüt */
+    }
+    .form-group input[type="date"]{
+          width: 85%;
+    }
+     .form-group input[type="date"] + button
+     {
+       width: 15%;
+     }
+
+
+    .form-group input[type="text"]:focus,
+    .form-group input[type="email"]:focus,
+    .form-group input[type="password"]:focus,
+    .form-group input[type="tel"]:focus,
+    .form-group input[type="date"]:focus,
+    .form-group select:focus
+    {
+        border-color: #6c63ff;
+        outline: none;
+        box-shadow: 0 0 5px rgba(108, 99, 255, 0.5);
+    }
+
+      .form-group input[type="radio"] {
+           margin-right:5px;
+        }
+        .form-group label:has(input[type="radio"]){
+           display:inline-block;
+           margin-right:15px;
+
+        }
+
+    /* Hata Mesajı */
+    .error-message {
+      color: rgb(255, 93, 93);
+      margin-bottom: 15px;
+      font-size: 15px; /* Yazı boyutu */
+      cursor: pointer;
+      padding: 10px;
+      border: 1px solid rgba(255, 0, 0, 0.548);
+      border-radius: 7.5px;
+      background-color: #ffe6e6;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .error-message:hover{
+      color: rgb(255, 52, 52);
+    }
+
+    /* Butonlar */
+    .submit-button-container {
+      position: relative;
+      display: inline-block;
+      width: 100%; /* Tam genişlik */
+    }
+
+    .submit-button {
+        background-color: #6c63ff;
+        color: white;
+        padding: 15px; /* Padding'i artır */
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+        font-size: 16px; /* Yazı boyutunu büyüt */
+        position: relative;
+        z-index: 1;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .submit-button-container:has(> .submit-button:disabled) > .submit-button{
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .submit-button:hover {
+        background-color: #5649e6;
+        transform: scale(1.05);
+    }
+
+    /* Uyarı Mesajı */
+    .alert-message {
+      position: absolute;
+      bottom: -30px;
+      left: 50%; /* Yatayda ortala */
+      transform: translateX(-50%); /* Yatayda ortala */
+      padding: 5px 10px;
+      background-color: white;
+      border: 2px solid red;
+      border-radius: 4px;
+      color: red;
+      font-size: 12px;
+      display: none;
+      z-index: 2;
+      animation: slideIn 0.3s ease-out;
+      white-space: nowrap; /* Yazıyı tek satırda tut */
+    }
+
+    @keyframes slideIn {
+      from { transform: translate(-50%, 10px); opacity: 0; }
+      to { transform: translate(-50%, 0); opacity: 1; }
+    }
+    @keyframes slideOut {
+      from { transform: translate(-50%, 0); opacity: 1; }
+      to { transform: translate(-50%, 10px); opacity: 0; }
+    }
+
+    /* Linkler */
+    .login-link, .register-link {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .login-link a, .register-link a {
+        color: #6c63ff;
+        text-decoration: none;
+    }
+
+    .login-link a:hover, .register-link a:hover {
+        text-decoration: underline;
+    }
+
+    /* Select Dropdown */
+    .form-group select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url('data:image/svg+xml;utf8,<svg fill="%23999" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 30px;
+    }
+
+    /* Progress Bar */
+    .progress-container {
+        width: 100%;
+        height: 10px;
+        background-color: #f0f0f0;
+        border-radius: 5px;
+        margin-top: 5px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        width: 0%;
+        border-radius: 5px;
+        background-color: #4CAF50;
+        transition: width 0.6s ease;
+    }
+
+    .progress-bar.weak {
+        background-color: #f44336;
+    }
+
+    .progress-bar.medium {
+        background-color: #ff9800;
+    }
+
+    .progress-bar.strong {
+        background-color: #4CAF50;
+    }
+
+    /* Geçersiz Input */
+    .invalid-input {
+      animation: shake 0.3s ease-in-out;
+      border-color: red !important;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25%, 75% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+    }
+
+      /* Sayfa Seçici */
+    .page-selector {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .page-selector button{
+       background-color: #6c63ff;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        margin: 0 5px;
+        border-radius: 5px;
+
+    }
+     .page-selector button:hover{
+        background-color: #5a51d1;
+     }
+    .page-selector button.active {
+      background-color: #4a42b7; /* Aktif buton rengi */
+      font-weight: bold;
+    }
+
+
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Login</h2>
-        <form id="loginForm">
-            <input type="text" id="username" placeholder="Username" required>
-            <input type="password" id="password" placeholder="Password" required>
-            <button type="submit">Login</button>
-            <p id="loginMessage"></p>
-        </form>
-        <p>Don't have an account? <a href="register.html">Register</a></p>
+
+  <div class="page-selector">
+        <button id="loginBtn" class="active">Login</button>
+        <button id="registerBtn">Register</button>
     </div>
-    <script src="/js/login.js"></script>
+
+  <div class="form-container" id="loginForm">
+    <h2>Login</h2>
+     <% if (locals.loginError) { %>
+           <div class="error-message">
+               <%= loginError %>
+           </div>
+       <% } %>
+    <form action="/login" method="POST">
+      <div class="form-group">
+        <label for="login-email">Email</label>
+        <input type="email" id="login-email" name="email" required>
+      </div>
+      <div class="form-group">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" name="password" required>
+      </div>
+      <div class="submit-button-container">
+           <button type="submit" class="submit-button">Login</button>
+      </div>
+
+    </form>
+    <p class="register-link">
+      Don't have an account? <a href="#" id="registerLink">Register</a>
+    </p>
+  </div>
+
+  <div class="form-container" id="registerForm" style="display: none;">
+    <h2>Registration Form</h2>
+        <% if (locals.registerError) { %>
+           <div class="error-message">
+               <%= registerError %>
+           </div>
+       <% } %>
+    <form action="/register" method="POST" id="registrationForm">
+      <div class="form-group">
+        <label for="username">Full Name</label>
+        <input type="text" id="username" name="username">
+      </div>
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email">
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password">
+        <div class="progress-container">
+          <div class="progress-bar" id="password-strength"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="confirm-password">Password Confirm</label>
+        <input type="password" id="confirm-password" name="confirm-password">
+      </div>
+      <div class="submit-button-container">
+        <button type="submit" class="submit-button">Submit</button>
+        <span class="alert-message" id="alertMessage">Please fill in all fields.</span>
+      </div>
+    </form>
+    <p class="login-link">
+      Already have an account? <a href="#" id="loginLink">Login</a>
+    </p>
+  </div>
+
+  <script>
+    const passwordInput = document.getElementById('password');
+    const strengthBar = document.getElementById('password-strength');
+    const registerForm = document.getElementById('registrationForm'); // ID eklendi
+    const submitButton = document.querySelector('#registerForm .submit-button'); // Düzeltildi
+    const alertMessage = document.getElementById('alertMessage');
+    const allInputs = registerForm.querySelectorAll('input'); // Düzeltildi
+    const loginFormContainer = document.getElementById('loginForm');
+    const registerFormContainer = document.getElementById('registerForm');
+    const loginBtn = document.getElementById('loginBtn');
+    const registerBtn = document.getElementById('registerBtn');
+    const registerLink = document.getElementById("registerLink");
+    const loginLink = document.getElementById("loginLink");
+
+    // Sayfa geçişleri
+    function showLoginForm() {
+      loginFormContainer.style.display = 'block';
+      registerFormContainer.style.display = 'none';
+      loginBtn.classList.add('active');
+      registerBtn.classList.remove('active');
+    }
+
+    function showRegisterForm() {
+      registerFormContainer.style.display = 'block';
+      loginFormContainer.style.display = 'none';
+      registerBtn.classList.add('active');
+      loginBtn.classList.remove('active');
+    }
+
+    loginBtn.addEventListener('click', showLoginForm);
+    registerBtn.addEventListener('click', showRegisterForm);
+    registerLink.addEventListener("click",(e)=>{
+        e.preventDefault();
+        showRegisterForm();
+    });
+    loginLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      showLoginForm();
+    });
+
+    // Şifre gücü (önceki kod)
+     if (passwordInput) { // passwordInput null değilse (kayıt formundaysak)
+      passwordInput.addEventListener('input', () => {
+          const password = passwordInput.value;
+          const strength = calculatePasswordStrength(password);
+          updateStrengthBar(strength);
+          checkFormValidity(); // Şifre değiştikçe formu da kontrol et
+        });
+      }
+
+
+    function calculatePasswordStrength(password) {
+        let strength = 0;
+        if (password.length >= 8) { strength += 1; }
+        if (/[A-Z]/.test(password)) { strength += 1;}
+        if (/[a-z]/.test(password)) { strength += 1; }
+        if (/[0-9]/.test(password)) { strength += 1;}
+        if (/[^A-Za-z0-9]/.test(password)) {strength += 1; }
+        return strength;
+    }
+
+    function updateStrengthBar(strength) {
+      strengthBar.style.width = (strength * 20) + '%';
+        strengthBar.classList.remove('weak', 'medium', 'strong');
+        if (strength <= 1) {
+            strengthBar.classList.add('weak');
+                strengthBar.style.width = (strength * 15) + '%';
+
+        } else if (strength <= 3) {
+            strengthBar.classList.add('medium');
+                strengthBar.style.width = (strength * 17) + '%';
+        }
+        else {
+            strengthBar.classList.add('strong');
+        }
+    }
+
+    // Form doğrulama (önceki kod, registerForm için)
+    if(registerForm){
+        registerForm.addEventListener('submit', (event) => { //registerForm null değilse (kayıt sayfasındaysa)
+          let isFormValid = true;
+          allInputs.forEach(input => {
+            if (input.value.trim() === '') {
+              isFormValid = false;
+              input.classList.add('invalid-input');
+            } else {
+              input.classList.remove('invalid-input');
+            }
+          });
+
+          if (!isFormValid) {
+            event.preventDefault();
+            alertMessage.style.animation = 'slideIn 0.3s ease-out';
+            alertMessage.style.display = 'block';
+
+            setTimeout(() => {
+              alertMessage.style.animation = 'slideOut 0.3s ease-out';
+              setTimeout(() => { alertMessage.style.display = 'none'; }, 300);
+            }, 3000);
+          }
+        });
+    }
+
+
+    // inputlara yazmaya başlayınca disabled kalksın (önceki// kod, registerForm için)
+    function checkFormValidity() {
+        let allFilled = true;
+        allInputs.forEach(input => {
+            if (input.value.trim() === '') {
+                allFilled = false;
+            }
+        });
+      if(submitButton){ //submitButton null değilse (kayıt sayfasındaysa)
+        submitButton.disabled = !allFilled;
+      }
+
+    }
+
+    if(allInputs){  //allInputs null değilse (kayıt sayfasındaysa)
+      allInputs.forEach(input => {
+        input.addEventListener('input', checkFormValidity);
+        input.addEventListener('input', () => {
+          input.classList.remove('invalid-input');
+        });
+      });
+    }
+
+
+    checkFormValidity(); // Sayfa yüklendiğinde kontrol
+
+  </script>
 </body>
 </html>
