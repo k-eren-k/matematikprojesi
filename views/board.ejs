@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://atugatran.github.io/FontAwesome6Pro/css/all.min.css">
+    <title>Basit Çizim Sayfası</title>
+     <style>
+        /* ÖNCEKİ TÜM CSS KODLARINIZ BURAYA GELECEK */
+               /* Temel sıfırlama ve genel stiller */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+::-webkit-scrollbar { display: none; }
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Daha modern bir font */
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    background-color: #fff; /* Hafif gri arka plan */
+}
+
+header {
+    background-color: #fff; /* Beyaz arka plan */
+    padding: 10px 20px; /* Daha fazla padding */
+    text-align: right;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Hafif gölge */
+    z-index: 2; /* Canvas'ın üzerinde olması için */
+}
+
+.sag-ust {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Daha fazla boşluk */
+}
+
+.hesap-menu {
+    position: relative;
+    display: inline-block;
+}
+
+/* Hesap dropdown */
+.hesap-dropdown {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #ddd; /* Daha açık border */
+    border-radius: 8px; /* Yuvarlatılmış köşeler */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Daha belirgin gölge */
+    right: 0;
+    z-index: 10;
+    min-width: 180px; /* Daha geniş */
+    overflow: hidden; /* İçerik taşmasını engelle */
+    padding: 5px 0; /* Dikey padding */
+}
+
+.hesap-dropdown p {
+    padding: 8px 20px; /* Daha fazla padding */
+    margin: 0;
+    white-space: nowrap;
+    color: #444; /* Daha koyu metin rengi */
+    transition: background-color 0.2s ease; /* Geçiş efekti */
+}
+
+.hesap-dropdown p:hover {
+    background-color: #f5f5f5; /* Hover rengi */
+}
+
+.hesap-menu:hover .hesap-dropdown {
+    display: block;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    width: auto;
+}
+
+/* Canvas kapsayıcısı */
+.canvas-container {
+    overflow: auto;
+    flex: 1;
+    position: relative;
+}
+
+#cizimAlani {
+    background-color: white;
+    position: absolute;
+    left: 0;
+    top: 0;
+    cursor: crosshair; /* Çizim imleci */
+}
+
+/* Alt menü (sol-menu) */
+aside {
+    width: 100%;
+    background-color: #fff; /* Beyaz arka plan */
+    padding: 12px 20px; /* Daha fazla padding */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10000000px;
+    border: 1px solid #cfd3d84b;
+    gap: 15px; /* Daha fazla boşluk */
+    order: 2;
+}
+
+aside button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 22px; /* Daha büyük ikonlar */
+    padding: 8px; /* Daha dengeli padding */
+    width: 44px;
+    height: 44px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%; /* Yuvarlak butonlar */
+    transition: background-color 0.2s ease, transform 0.2s ease; /* Geçiş efektleri */
+    color: #555; /* Daha yumuşak ikon rengi */
+}
+
+aside button:hover {  /* Hover efekti */
+    background-color: #E4E8EC;
+    transform: translateY(-2px); /* Hafif yukarı hareket */
+}
+
+
+/* Buton grupları için container (palet, cetvel, boyut) */
+.palet-container, .cetvel-container, .boyut-container {
+    position: relative; /* Dropdown için */
+}
+
+/* Dropdown menüler (ortak stil) */
+.palet-dropdown, .cetvel-dropdown, .boyut-dropdown {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 5;
+    min-width: 120px; /* Daha geniş */
+    left: 50%;
+    transform: translateX(-50%);
+    top: auto;
+    bottom: calc(100% + 8px); /* Butonun biraz altında */
+    overflow: hidden; /* İçerik taşmasını engelle*/
+    padding: 5px;
+
+}
+
+
+/* Palet renk kutuları */
+.palet-dropdown div {
+    width: 24px;
+    height: 24px;
+    margin: 3px;
+    display: inline-block;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    border-radius: 4px; /* Hafif yuvarlak */
+    transition: transform 0.1s ease; /* Geçiş efekti */
+}
+
+.palet-dropdown div:hover {
+    transform: scale(1.1); /* Hafif büyütme */
+}
+
+/* Cetvel butonları */
+.cetvel-dropdown button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    width: 100%;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    color: #444;
+    font-size: 14px;
+}
+
+.cetvel-dropdown button:hover {
+    background-color: #f0f0f0;
+}
+
+/* Boyut ayarı */
+.boyut-dropdown input[type="range"] {
+    width: 100px;
+    margin: 10px 5px;
+    cursor: pointer;
+    -webkit-appearance: none;  /* Varsayılan stili kaldır */
+    appearance: none;
+    background-color: #ddd; /* Çubuk rengi */
+    height: 8px;
+    border-radius: 4px;
+    outline: none;
+}
+
+.boyut-dropdown input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: #134BA6; /* Mavi tutamaç */
+    cursor: pointer;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+}
+.boyut-dropdown input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: #134BA6;
+    cursor: pointer;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+
+.boyut-deger {
+     text-align: center; /* Ortala */
+    font-size: 14px;
+    color: #555;
+    margin-top: 2px; /* Üstten biraz boşluk */
+}
+
+/* Kaydırma modu imleci */
+.kaydirma-aktif {
+    cursor: grab;
+}
+
+.kaydirma-aktif:active {
+    cursor: grabbing;
+}
+
+/* Sol menü (kullanılmıyor, ama yine de düzenleyelim) */
+.sol-menu {
+  display: none; /* sol menuyu komple kapattım*/
+    background-color: #F0F4F9;
+    width: auto; /* Otomatik genişlik */
+    border-radius: 25px;
+    margin-bottom: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 10px;
+    height: auto; /* Otomatik yükseklik */
+    display: flex; /* Butonları yan yana */
+    justify-content: center; /* Yatayda ortala */
+    align-items: center; /* Dikeyde ortala */
+    gap: 10px;
+}
+
+.sol-menu button {
+    font-size: 18px;
+    color: #495057;
+    border-radius: 50%; /* Yuvarlak buton */
+    transition: all 0.2s ease;
+    padding: 8px; /* Daha dengeli padding */
+    width: 40px;
+    height: 40px;
+    display: flex; /* İçeriği ortala */
+    justify-content: center;
+    align-items: center;
+}
+
+/* Aktif/hover stilleri (artık kullanılmıyor, ama yine de düzenli)*/
+/*
+.sol-menu button:hover {
+    color: black;
+    transform: scale(1.1); / * Hafif büyütme * /
+    background-color: #e0e0e0;
+}
+*/
+
+.sol-menu button.aktif-arac {
+    background-color: #D3E3FD;
+    color: #134BA6;
+    transform: scale(1.12);
+}
+.sol-menu button.aktif-arac:hover{
+    background-color: #D3E3FD;
+    color: #134BA6;
+    transform: scale(1.12);
+}
+
+/* Modal Stili */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 100; /* En üstte */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5); /* Daha koyu yarı saydam arka plan */
+    backdrop-filter: blur(3px); /* Arka planı bulanıklaştır (destekleyen tarayıcılarda) */
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 10% auto; /* Daha yukarıda */
+    padding: 25px; /* Daha fazla padding */
+    border: none; /* Border'ı kaldır */
+    border-radius: 12px; /* Daha yuvarlak köşeler */
+    width: 90%;
+    max-width: 500px; /* Daha dar */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Daha belirgin gölge */
+    animation: modal-open 0.3s ease; /* Animasyon */
+}
+
+@keyframes modal-open {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.kapat {
+    color: #aaa;
+    float: right;
+    font-size: 30px; /* Daha büyük */
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s ease; /* Geçiş efekti */
+}
+
+.kapat:hover, .kapat:focus {
+    color: #333; /* Daha koyu renk */
+    text-decoration: none;
+}
+
+/* Ekstra: Butonlara ikon eklemek için (Font Awesome kullanıyorsanız) */
+#ayarlarBtn i, #hesapBtn i {
+    margin-right: 8px; /* İkon ve metin arasına boşluk */
+}
+
+/* Eklenen ve Düzenlenen Kısım */
+.ekleme-menu {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    border: 1px solid #E6EAF0;
+    padding: 10px;
+    height: calc(82px - 20px);
+    background-color: #F0F4F9;
+    border-radius: 25px;
+    z-index: 3; /* Canvas'ın üzerinde, header'ın altında */
+    display: flex;
+    gap: 10px;
+}
+
+.ekleme-menu button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 6px 10px;
+    border-radius: 1116px;
+    transition: background-color 0.2s ease;
+    color: #555;
+}
+.ekleme-menu button:hover{
+    background-color: #D3E3FD;
+    color: #000000;
+    transform: scale(1.12);
+}
+.ekleme-menu button:hover {
+    background-color: #E4E8EC;
+}
+
+/* ... (Önceki CSS kodları) ... */
+
+.eklenen-resim, .eklenen-metin {
+    /* ... (Önceki stiller) ... */
+    position: absolute;
+    cursor: move;
+    user-select: none;
+    z-index: 4;
+    border: 2px dashed transparent;
+    padding: 5px;
+    resize: both; /* BOTH EKLE */
+    overflow: auto; /* EKLE */
+    min-width: 50px; /* Minimum genişlik */
+    min-height: 30px; /* Minimum yükseklik */
+
+}
+
+
+.eklenen-resim:hover, .eklenen-metin:hover,
+.eklenen-resim:focus, .eklenen-metin:focus {
+    border-color: #134BA6;
+    outline: none;
+}
+
+/* Köşelerdeki tutamaçlar (resize handles) */
+.resizer {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: #134BA6;
+    border: 1px solid #fff;
+    border-radius: 50%; /* Yuvarlak tutamaç */
+    z-index: 5; /* Elementin üzerinde */
+}
+
+.resizer.nw { top: -5px; left: -5px; cursor: nwse-resize; }
+.resizer.ne { top: -5px; right: -5px; cursor: nesw-resize; }
+.resizer.sw { bottom: -5px; left: -5px; cursor: nesw-resize; }
+.resizer.se { bottom: -5px; right: -5px; cursor: nwse-resize; }
+#chatButton {
+            position: fixed;
+            bottom: 20px;
+            left: 20px; /* Sol alta */
+            background-color: #134BA6; /* Mavi */
+            color: white;
+            border: none;
+            border-radius: 50%; /* Yuvarlak */
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 10; /* Yüksek z-index */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.3s ease;
+        }
+
+        #chatButton:hover {
+            background-color: #0f3e8e; /* Daha koyu mavi */
+        }
+/* Chat Sidebar */
+.chat-sidebar {
+    position: fixed;
+    top: 0;
+    left: -300px; /* Başlangıçta gizli */
+    width: 280px; /* Genişlik */
+    height: 100%;
+    background-color: #f8f9fa; /* Arka plan */
+    border-right: 1px solid #dee2e6;
+    z-index: 1050;
+    transition: left 0.3s ease; /* Animasyon */
+    overflow-y: auto; /* Gerekirse kaydırma */
+    display: flex; /* Flexbox kullan */
+    flex-direction: column; /* Dikey düzen */
+    padding-top: 15px; /* Üst padding */
+}
+
+.chat-sidebar.open {
+    left: 0;
+}
+.chat-header {
+    padding: 10px;
+    background-color: #134BA6; /* Mavi başlık */
+    color: white;
+    display: flex; /* Flexbox */
+    justify-content: space-between; /* Başlık ve kapatma butonu */
+    align-items: center; /* Dikey ortalama */
+    margin-bottom: 15px;
+    padding: 15px; /* Padding */
+
+}
+
+.chat-header h2 {
+    margin: 0; /* Başlık margin'i sıfırla */
+    font-size: 1.25rem; /* Başlık boyutu */
+
+}
+
+.chat-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+     transition: transform 0.3s ease; /* Geçiş efekti */
+
+}
+ .chat-close:hover {
+
+    transform: rotate(90deg); /* Döndürme efekti */
+ }
+
+.chat-messages {
+    flex-grow: 1; /* Mesajların mevcut alanı doldurması */
+    padding: 10px;
+    overflow-y: auto; /* Kaydırma */
+}
+.chat-messages p {
+    margin-bottom: 10px; /* Mesajlar arası boşluk */
+    padding: 8px 12px; /* Mesaj padding */
+    border-radius: 8px; /* Yuvarlak köşeler */
+    line-height: 1.4; /* Satır yüksekliği */
+    max-width: 80%; /* Maksimum genişlik */
+    word-wrap: break-word; /* Uzun kelimeleri kır */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* Hafif gölge */
+}
+
+.user-message {
+    background-color: #dcf8c6; /* Açık yeşil (kullanıcı mesajı) */
+    align-self: flex-end; /* Sağa hizala */
+    margin-left: auto; /* Otomatik sol boşluk */
+}
+
+.bot-message {
+    background-color: #fff; /* Beyaz (bot mesajı) */
+    align-self: flex-start; /* Sola hizala */
+    margin-right: auto; /* Otomatik sağ boşluk */
+}
+
+
+.chat-input-area {
+    padding: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.chat-input-area input {
+    flex-grow: 1; /* Giriş alanının genişlemesi */
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+     transition: border-color 0.3s ease; /* Geçiş efekti */
+}
+
+.chat-input-area input:focus {
+    border-color: #80bdff; /* Odaklanma rengi */
+    outline: 0; /* Odaklanma çerçevesini kaldır */
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25); /* Odaklanma gölgesi */
+}
+
+.chat-input-area button {
+    padding: 10px 15px;
+    background-color: #28a745; /* Gönder butonu rengi */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap; /* Buton metnini tek satırda tut */
+    transition: background-color 0.3s ease; /* Geçiş efekti */
+}
+
+.chat-input-area button:hover {
+   background-color: #218838; /* Hover rengi */
+}
+/* Overlay */
+.chat-overlay {
+  display: none; /* Başlangıçta gizli */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Yarı saydam siyah */
+  z-index: 1049; /* Sidebar'ın hemen altında */
+}
+
+.chat-sidebar.open + .chat-overlay {
+  display: block; /* Sidebar açıkken overlay'i göster */
+}
+/* (İsteğe bağlı) Metin kutusu için sadece dikey boyutlandırma */
+/*.eklenen-metin {
+    resize: vertical;
+}*/
+    </style>
+</head>
+<body>
+<header>
+    <div class="sag-ust">
+        <button id="ayarlarBtn"><i class="fas fa-cog"></i> Ayarlar</button>
+        <div class="hesap-menu">
+            <button id="hesapBtn"><i class="fas fa-user"></i> Hesap</button>
+            <div class="hesap-dropdown" id="hesapDropdown">
+                <p>Kullanıcı Adı: RastgeleKullanici123</p>
+                <p>Email: rastgele@mail.com</p>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main>
+<button id="chatButton"><i class="fa-regular fa-comment-dots"></i></button>
+
+    <aside class="sol-menu">
+        <button id="kalemBtn" class="aktif-arac"><i class="fa-regular fa-pencil"></i></button>
+        <button style="display: none;" id="vurguBtn"><i class="fa-regular fa-highlighter" ></i></button>
+        <button id="silgiBtn"><i class="fa-regular fa-eraser"></i></button>
+
+        <div class="palet-container">
+            <button id="paletBtn"><i class="fa-regular fa-palette"></i></button>
+            <div class="palet-dropdown" id="paletDropdown"></div>
+        </div>
+
+        <div class="cetvel-container">
+            <button id="cetvelBtn"><i class="fa-regular fa-ruler-combined"></i></button>
+            <div class="cetvel-dropdown" id="cetvelDropdown">
+                <button data-sekil="daire">Daire</button>
+                <button data-sekil="kare">Kare</button>
+                <button data-sekil="ucgen">Üçgen</button>
+                <button data-sekil="altigen">Altıgen</button>
+            </div>
+        </div>
+
+        <div class<div class="boyut-container">
+            <button id="boyutBtn"><i class="fa-regular fa-circle-half-stroke"></i></button>
+            <div class="boyut-dropdown" id="boyutDropdown">
+                <input type="range" id="boyutAyar" min="1" max="50" value="2">
+                <p class="boyut-deger">2</p>
+            </div>
+        </div>
+
+
+        <button id="geriBtn"><i class="fa-regular fa-rotate-left"></i></button>
+        <button id="ileriBtn"><i class="fa-regular fa-rotate-right"></i></button>
+        <button id="kaydirBtn"><i class="fa-regular fa-arrows-up-down-left-right"></i></button>
+    </aside>
+
+    <div class="canvas-container">
+        <canvas id="cizimAlani"></canvas>
+    </div>
+
+    <div class="ekleme-menu">
+        <button id="resimEkleBtn"><i class="fa-regular fa-image"></i></button>
+        <button id="metinEkleBtn"><i class="fa-regular fa-message-text"></i></button>
+    </div>
+
+</main>
+
+<div class="chat-sidebar" id="chatSidebar">
+    <div class="chat-header">
+         <h2>Sohbet</h2>
+          <button class="chat-close" id="closeChat">&times;</button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+    </div>
+    <div class="chat-input-area">
+        <input type="text" id="chatInput" placeholder="Mesajınızı yazın...">
+        <button id="sendChat">Gönder</button>
+    </div>
+</div>
+<div class="chat-overlay" id="chatOverlay"></div>
+
+<div id="ayarlarModal" class="modal">
+    <div class="modal-content">
+        <span class="kapat">&times;</span>
+        <p>Ayarlar içeriği buraya gelecek...</p>
+    </div>
+</div>
+
+<script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
+<script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const canvas = document.getElementById('cizimAlani');
+        const ctx = canvas.getContext('2d');
+        const canvasContainer = document.querySelector('.canvas-container');
+
+        const genislikCarpani = 5;
+        canvas.width = (window.innerWidth - 70) * genislikCarpani;
+        canvas.height = window.innerHeight - 55;
+
+        let cizim = false;
+        let aktifArac = 'kalem';
+        let seciliRenk = 'black';
+        let cizimBoyutu = 2;
+        const cizimGecmisi = [];
+        let gecmisAdimi = -1;
+
+        let kaydirmaAktif = false;
+        let baslangicX, baslangicY;
+
+        // Socket.IO Bağlantısı (Kullanıcı ID'si ile)
+        const userId = "<%= user._id %>"; // EJS ile sunucudan alınan kullanıcı ID'si
+        const socket = io(`http://localhost:3000`, { query: { userId: userId } }); // Socket.IO bağlantısı
+
+
+        socket.on('connect', () => { // 'connect' olayını dinle
+            console.log('Socket.IO bağlantısı kuruldu.');
+              // Bağlantı kurulduğunda geçmişi yükle (eğer varsa)
+            if (cizimGecmisi.length > 0) {
+                const sonDurum = new Image();
+                sonDurum.src = cizimGecmisi[cizimGecmisi.length - 1];
+                sonDurum.onload = () => {
+                    ctx.drawImage(sonDurum, 0, 0);
+                };
+            }
+        });
+
+
+        socket.on('disconnect', () => {
+            console.log('Socket.IO bağlantısı kesildi.');
+        });
+
+        socket.on('error', (error) => {
+          console.error("Socket.IO hatası:", error);
+        })
+
+
+
+        socket.on('drawing', (message) => { // 'drawing' olayını dinle
+            try {
+               // console.log("Alınan çizim mesajı:", message); //Hata ayıklama
+                switch (message.type) {
+                    case 'line':
+                        drawLine(message.data);
+                        break;
+                    case 'highlight':
+                        drawHighlight(message.data);
+                        break;
+                    case 'erase':
+                        erase(message.data);
+                        break;
+                    case 'circle':
+                    case 'kare':
+                    case 'ucgen':
+                    case 'altigen':
+                        drawShape(message.data);
+                        break;
+                    case 'undo':
+                        remoteUndo();
+                        break;
+                    case 'redo':
+                        remoteRedo();
+                        break;
+                    case 'image':
+                        addImageFromUrl(message.data);
+                        break;
+                    case 'text':
+                        addText(message.data)
+                        break;
+                     //Chat mesajlarını dinle
+                    case 'chat':
+                         addMessage(message.data.message, message.data.sender);
+                         break;
+
+                }
+            } catch (error) {
+                console.error("Socket.IO mesajı işleme hatası:", error);
+            }
+        });
+
+        //Yardımcı fonksiyonlar (diğer cihazdan gelen çizimler için)
+        function drawLine(data) {
+            console.log("drawLine çağrıldı. data:", data); // Hata ayıklama
+            ctx.lineWidth = data.size;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = data.color;
+            ctx.beginPath();
+            ctx.moveTo(data.startX, data.startY);
+            ctx.lineTo(data.endX, data.endY);
+            ctx.stroke();
+            ctx.beginPath(); // Gerekli, yoksa çizgiler birleşiyor.
+        }
+
+        function drawHighlight(data) {
+            console.log("drawHighlight çağrıldı. data:", data); // Hata ayıklama
+            ctx.lineWidth = data.size;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = data.color;
+            ctx.beginPath();
+            ctx.moveTo(data.startX, data.startY);
+            ctx.lineTo(data.endX, data.endY);
+            ctx.stroke();
+            ctx.beginPath();
+        }
+
+        function erase(data) {
+            console.log("erase çağrıldı. data:", data); // Hata ayıklama
+            ctx.lineWidth = data.size;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = 'white'; // Silgi beyaz renkte olmalı
+            ctx.globalCompositeOperation = 'destination-out'; //Silme işlemi
+            ctx.beginPath();
+            ctx.moveTo(data.startX, data.startY);
+            ctx.lineTo(data.endX, data.endY);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.globalCompositeOperation = 'source-over'; // Çizim moduna geri dön
+        }
+
+
+        function drawShape(data) {
+            console.log("drawShape çağrıldı. data:", data); // Hata ayıklama
+            ctx.beginPath();
+            ctx.strokeStyle = data.color;
+            ctx.fillStyle = data.color;
+            ctx.lineWidth = 2;
+
+            const x = data.x;
+            const y = data.y;
+
+            switch (data.shape) {
+                case 'daire':
+                    ctx.arc(x, y, 50, 0, 2 * Math.PI);
+                    ctx.stroke();
+                    break;
+                case 'kare':
+                    ctx.rect(x - 50, y - 50, 100, 100);
+                    ctx.stroke();
+                    break;
+                case 'ucgen':
+                    ctx.moveTo(x, y - 50);
+                    ctx.lineTo(x + 50, y + 50);
+                    ctx.lineTo(x - 50, y + 50);
+                    ctx.closePath();
+                    ctx.stroke();
+                    break;
+                case 'altigen':
+                    const size = 50;
+                    ctx.moveTo(x + size * Math.cos(0), y + size * Math.sin(0));
+                    for (let i = 1; i <= 6; i++) {
+                        ctx.lineTo(x + size * Math.cos(i * 2 * Math.PI / 6), y + size * Math.sin(i * 2 * Math.PI / 6));
+                    }
+                    ctx.closePath();
+                    ctx.stroke();
+                    break;
+            }
+        }
+
+        // Diğer cihazdan gelen resim
+        function addImageFromUrl(data) {
+            console.log("addImageFromUrl çağrıldı. data:", data); // Hata ayıklama
+            const img = new Image();
+            img.src = data.url;
+            ekranaResimEkle(img); // Bu fonksiyonu kullan
+        }
+
+        //Diğer cihazdan gelen Metin
+        function addText(data){
+             console.log("addText çağrıldı. data:", data); // Hata ayıklama
+            ekranaMetinEkle(data.text, data.x, data.y);
+        }
+
+
+        // Diğer cihazda yapılan geri/ileri alma işlemleri için
+        function remoteUndo() {
+            console.log("remoteUndo çağrıldı."); // Hata ayıklama
+            if (gecmisAdimi > 0) {
+                gecmisAdimi--;
+                const oncekiDurum = new Image();
+                oncekiDurum.src = cizimGecmisi[gecmisAdimi];
+                oncekiDurum.onload = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(oncekiDurum, 0, 0);
+                };
+            }
+        }
+
+        function remoteRedo() {
+            console.log("remoteRedo çağrıldı."); // Hata ayıklama
+            if (gecmisAdimi < cizimGecmisi.length - 1) {
+                gecmisAdimi++;
+                const sonrakiDurum = new Image();
+                sonrakiDurum.src = cizimGecmisi[gecmisAdimi];
+                sonrakiDurum.onload = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(sonrakiDurum, 0, 0);
+                };
+            }
+        }
+
+
+
+        // Yardımcı fonksiyon: Canvas dışına taşmayı engelle
+        function constrainPosition(element) {
+            const containerRect = canvasContainer.getBoundingClientRect();
+            const elementRect = element.getBoundingClientRect();
+
+            let newTop = elementRect.top - containerRect.top;
+            let newLeft = elementRect.left - containerRect.left;
+
+            if (newTop < 0) {
+                newTop = 0;
+            }
+            if (newLeft < 0) {
+                newLeft = 0;
+            }
+            if (newTop + elementRect.height > containerRect.height) {
+                newTop = containerRect.height - elementRect.height;
+            }
+
+            if (newLeft + elementRect.width > containerRect.width) {
+                newLeft = containerRect.width - elementRect.width;
+            }
+            element.style.top = `${newTop}px`;
+            element.style.left = `${newLeft}px`;
+        }
+
+
+
+        // Araç seçimi
+        const aracSec = (arac) => {
+            const butonlar = document.querySelectorAll('.sol-menu button');
+            butonlar.forEach(btn => btn.classList.remove('aktif-arac'));
+
+            switch (arac) {
+                case 'kalem':
+                    aktifArac = 'kalem';
+                    kalemBtn.classList.add('aktif-arac');
+                    ctx.globalCompositeOperation = 'source-over';
+                    break;
+                case 'vurgu':
+                    aktifArac = 'vurgu';
+                    vurguBtn.classList.add('aktif-arac');
+                    ctx.globalCompositeOperation = 'source-over';
+                    break;
+                case 'silgi':
+                    aktifArac = 'silgi';
+                    silgiBtn.classList.add('aktif-arac');
+                    ctx.globalCompositeOperation = 'destination-out';
+                    break;
+                case 'kaydir':
+                    aktifArac = 'kaydir';
+                    kaydirBtn.classList.add('aktif-arac');
+                    canvasContainer.classList.add('kaydirma-aktif');
+                    break;
+            }
+            if (arac !== 'kaydir') {
+                canvasContainer.classList.remove('kaydirma-aktif');
+            }
+        }
+
+        const kalemBtn = document.getElementById('kalemBtn');
+        const vurguBtn = document.getElementById('vurguBtn');
+        const silgiBtn = document.getElementById('silgiBtn');
+        const kaydirBtn = document.getElementById('kaydirBtn');
+
+        kalemBtn.addEventListener('click', () => aracSec('kalem'));
+        vurguBtn.addEventListener('click', () => aracSec('vurgu'));
+        silgiBtn.addEventListener('click', () => aracSec('silgi'));
+        kaydirBtn.addEventListener('click', () => aracSec('kaydir'));
+
+        // Boyut ayarı
+        const boyutBtn = document.getElementById('boyutBtn');
+        const boyutAyar = document.getElementById('boyutAyar');
+        const boyutDropdown = document.getElementById('boyutDropdown');
+        const boyutDeger = document.querySelector(".boyut-deger");
+
+        boyutBtn.addEventListener('click', (event) => {
+            if (boyutDropdown.style.display === 'block') {
+                boyutDropdown.style.display = 'none';
+            } else {
+                boyutDropdown.style.display = 'block';
+                paletDropdown.style.display = "none";
+                cetvelDropdown.style.display = "none";
+                hesapDropdown.style.display = "none";
+            }
+            event.stopPropagation();
+        });
+
+        boyutAyar.addEventListener('input', () => {
+            cizimBoyutu = boyutAyar.value;
+            boyutDeger.textContent = boyutAyar.value;
+        });
+
+
+
+        // Palet
+        const paletBtn = document.getElementById('paletBtn');
+        const paletDropdown = document.getElementById('paletDropdown');
+        const renkler = ['black', 'red', 'green', 'blue', 'yellow', 'orange', 'purple', 'pink', 'brown', 'gray', 'white'];
+
+        renkler.forEach(renk => {
+            const renkKutusu = document.createElement('div');
+            renkKutusu.style.backgroundColor = renk;
+            renkKutusu.addEventListener('click', () => {
+                seciliRenk = renk;
+                paletDropdown.style.display = 'none';
+            });
+            paletDropdown.appendChild(renkKutusu);
+        });
+
+        paletBtn.addEventListener('click', (event) => {
+            if (paletDropdown.style.display === 'block') {
+                paletDropdown.style.display = 'none';
+            } else {
+                paletDropdown.style.display = 'block';
+                cetvelDropdown.style.display = "none";
+                hesapDropdown.style.display = "none";
+                boyutDropdown.style.display = 'none';
+            }
+            event.stopPropagation();
+        });
+
+        // Cetvel ve şekiller
+        const cetvelBtn = document.getElementById('cetvelBtn');
+        const cetvelDropdown = document.getElementById('cetvelDropdown');
+        let seciliSekil = null;
+
+        cetvelBtn.addEventListener('click', (event) => {
+            if (cetvelDropdown.style.display === 'block') {
+                cetvelDropdown.style.display = 'none';
+            } else {
+                cetvelDropdown.style.display = 'block';
+                paletDropdown.style.display = "none";
+                hesapDropdown.style.display = "none";
+                boyutDropdown.style.display = 'none';
+            }
+            event.stopPropagation();
+        });
+
+        cetvelDropdown.addEventListener('click', (event) => {
+            if (event.target.tagName === 'BUTTON') {
+                seciliSekil = event.target.dataset.sekil;
+                cetvelDropdown.style.display = 'none';
+            }
+        });
+          function baslaCizim(e) {
+            console.log("baslaCizim çağrıldı!"); // Hata ayıklama için eklendi
+            cizim = true;
+            kaydetCizimDurumu();
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            if (seciliSekil) {
+                cizSekil(x, y);
+                seciliSekil = null; // Şekil çizildikten sonra sıfırla
+            } else {
+                ciz(e); // Normal çizime başla
+            }
+        }
+        function ciz(e) {
+    if (!cizim) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    console.log("ciz() çağrıldı. x:", x, "y:", y, "aktifArac:", aktifArac, "seciliRenk:", seciliRenk, "cizimBoyutu:", cizimBoyutu); // Hata ayıklama
+
+    ctx.lineWidth = cizimBoyutu;
+    ctx.lineCap = 'round';
+    let messageType = '';
+
+    if (aktifArac === 'vurgu') {
+        ctx.strokeStyle = seciliRenk + 'B3'; // Vurgu rengine şeffaflık ekle
+        messageType = 'highlight';
+    } else if (aktifArac === 'silgi') {
+        ctx.strokeStyle = 'white'; // Silgi beyaz renkte olmalı
+        ctx.globalCompositeOperation = 'destination-out'; // Canvas'ta silme işlemi yapar
+        messageType = 'erase';
+    } else {
+        ctx.strokeStyle = seciliRenk;
+        messageType = 'line';
+    }
+
+    // Önceki noktadan şimdiki noktaya çizgi çek
+    ctx.lineTo(x, y);
+    ctx.stroke();
+
+    // Socket.IO üzerinden çizim verisi gönder
+    let messageToSend = {
+        type: messageType,
+        data: {
+            startX: ctx.canvas._lastX || x,  // İlk nokta için özel bir değer kullan (_lastX ve _lastY)
+            startY: ctx.canvas._lastY || y,
+            endX: x,
+            endY: y,
+            color: ctx.strokeStyle,
+            size: ctx.lineWidth
+        }
+    };
+    console.log("Gönderilen Socket.IO mesajı:", messageToSend); // Hata ayıklama - Gönderilen mesajı konsola yazdır
+    socket.emit('drawing', messageToSend);
+
+
+    // Yeni çizime başla (önemli!)
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+
+    // Son konumu sakla (bir sonraki çizim için başlangıç noktası olacak)
+    ctx.canvas._lastX = x;
+    ctx.canvas._lastY = y;
+
+    // Eğer silgi kullanılıyorsa, globalCompositeOperation'ı 'source-over' (varsayılan) olarak ayarla
+    if (aktifArac === 'silgi') {
+        ctx.globalCompositeOperation = 'source-over';
+    }
+}
+
+canvasContainer.addEventListener('scroll', (e) => {
+    // Socket.IO üzerinden kaydırma bilgisini gönder
+    socket.emit('scroll', {
+        scrollLeft: canvasContainer.scrollLeft,
+        scrollTop: canvasContainer.scrollTop
+    });
+});
+// Socket.IO'dan gelen 'scroll' olayını dinle
+socket.on('scroll', (data) => {
+    // Diğer cihazdan gelen kaydırma bilgisiyle canvasContainer'ı güncelle
+    // preventScrollEvent, senkronizasyon sırasında sonsuz döngüyü engeller.
+    canvasContainer.removeEventListener('scroll', scrollHandler); // Olay dinleyicisini geçici olarak kaldır
+    canvasContainer.scrollLeft = data.scrollLeft;
+    canvasContainer.scrollTop = data.scrollTop;
+    canvasContainer.addEventListener('scroll', scrollHandler); // Olay dinleyicisini geri ekle
+
+});
+           function bitirCizim() {
+             console.log("bitirCizim çağrıldı"); // Hata ayıklama
+            cizim = false;
+             //Son konumu sıfırla
+            ctx.canvas._lastX = null;
+            ctx.canvas._lastY = null;
+            ctx.beginPath(); // Path'i sıfırla
+        }
+
+          function cizSekil(x, y) {
+            console.log("cizSekil çağrıldı. x:", x, "y:", y, "seciliSekil:", seciliSekil); // Hata ayıklama
+            ctx.beginPath();
+            ctx.strokeStyle = seciliRenk;
+            ctx.fillStyle = seciliRenk;
+            ctx.lineWidth = 2;
+
+            let shapeType = seciliSekil;
+
+            switch (seciliSekil) {
+                case 'daire':
+                    ctx.arc(x, y, 50, 0, 2 * Math.PI);
+                    ctx.stroke();
+                    break;
+                case 'kare':
+                    ctx.rect(x - 50, y - 50, 100, 100);
+                    ctx.stroke();
+                    break;
+                case 'ucgen':
+                    ctx.moveTo(x, y - 50);
+                    ctx.lineTo(x + 50, y + 50);
+                    ctx.lineTo(x - 50, y + 50);
+                    ctx.closePath();
+                    ctx.stroke();
+                    break;
+                case 'altigen':
+                    const size = 50;
+                    ctx.moveTo(x + size * Math.cos(0), y + size * Math.sin(0));
+                    for (let i = 1; i <= 6; i++) {
+                        ctx.lineTo(x + size * Math.cos(i * 2 * Math.PI / 6), y + size * Math.sin(i * 2 * Math.PI / 6));
+                    }
+                    ctx.closePath();
+                    ctx.stroke();
+                    break;
+            }
+            kaydetCizimDurumu();
+
+              // Socket.IO ile şekil çizimini gönder
+                let shapeMessage = {
+                    type: shapeType,  // Şeklin türünü gönder
+                    data: { x, y, color: seciliRenk, shape: shapeType } // Şeklin verilerini gönder
+                }
+                console.log("Gönderilen şekil mesajı:", shapeMessage); // Hata ayıklama
+                socket.emit('drawing', shapeMessage);
+
+
+        }
+
+        function kaydetCizimDurumu() {
+            gecmisAdimi++;
+            if (gecmisAdimi < cizimGecmisi.length) {
+                cizimGecmisi.length = gecmisAdimi;
+            }
+            cizimGecmisi.push(canvas.toDataURL());
+        }
+
+        function geriAl() {
+            console.log("geriAl çağrıldı"); // Hata ayıklama
+            if (gecmisAdimi > 0) {
+                gecmisAdimi--;
+                const oncekiDurum = new Image();
+                oncekiDurum.src = cizimGecmisi[gecmisAdimi];
+                oncekiDurum.onload = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(oncekiDurum, 0, 0);
+                };
+                 socket.emit('drawing', { type: 'undo' });
+
+            }
+        }
+         function ileriAl() {
+             console.log("ileriAl çağrıldı"); // Hata ayıklama
+            if (gecmisAdimi < cizimGecmisi.length - 1) {
+                gecmisAdimi++;
+                const sonrakiDurum = new Image();
+                sonrakiDurum.src = cizimGecmisi[gecmisAdimi];
+                sonrakiDurum.onload = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(sonrakiDurum, 0, 0);
+                };
+
+                // Socket.IO ile ileri alma işlemini gönder
+               socket.emit('drawing', { type: 'redo' });
+            }
+        }
+
+         // Resim ve Metin Ekleme
+        const resimEkleBtn = document.getElementById('resimEkleBtn');
+        const metinEkleBtn = document.getElementById('metinEkleBtn');
+
+        resimEkleBtn.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const img = new Image();
+                    img.src = reader.result;
+                    ekranaResimEkle(img); // Resmi ekrana ekle
+
+                    img.onload = () => {
+                      // Socket.IO üzerinden resim bilgisini gönder
+
+                            socket.emit('drawing',{
+                                type: 'image',
+                                data: { url: img.src }
+                            });
+
+                    }
+                }
+                reader.readAsDataURL(file);
+            }
+            input.click();
+        });
+         metinEkleBtn.addEventListener('click', () => {
+            const metin = prompt("Metni girin:");
+            if (metin) {
+                // Metin kutusunun konumunu canvas'ın ortasına ayarla
+                const x = canvasContainer.offsetWidth / 2;
+                const y = canvasContainer.offsetHeight / 2;
+
+                ekranaMetinEkle(metin, x, y); // Metin ve konum bilgilerini fonksiyona gönder
+
+                // Socket.IO üzerinden metin ve konum bilgisini gönder
+
+                    socket.emit('drawing',{
+                        type: 'text',
+                        data: { text: metin, x: x, y: y }
+                    });
+
+            }
+        });
+
+         function ekranaResimEkle(img) {
+            const resimDiv = document.createElement('div');
+            resimDiv.classList.add('eklenen-resim');
+            resimDiv.appendChild(img);
+            canvasContainer.appendChild(resimDiv);
+
+            // Resmin boyutları yüklendikten sonra konumlandırma ve tutamaç ekleme
+            img.onload = () => {
+                resimDiv.style.left = `${canvasContainer.offsetWidth / 2 - img.width / 2}px`;
+                resimDiv.style.top = `${canvasContainer.offsetHeight / 2 - img.height / 2}px`;
+                addResizeHandles(resimDiv); // Boyutlandırma tutamaçlarını ekle
+                surukleBirak(resimDiv);     // Sürükleme işlevselliğini ekle
+            }
+        }
+        function ekranaMetinEkle(metin, x, y) {
+            const metinDiv = document.createElement('div');
+            metinDiv.classList.add('eklenen-metin');
+            metinDiv.textContent = metin;
+            metinDiv.contentEditable = true;
+            canvasContainer.appendChild(metinDiv);
+
+            // Metin kutusunu canvas'ın ortasına veya belirtilen konuma yerleştir
+            metinDiv.style.left = `${x - metinDiv.offsetWidth / 2}px`;
+            metinDiv.style.top = `${y - metinDiv.offsetHeight / 2}px`;
+
+
+            surukleBirak(metinDiv); // Sürükleme fonksiyonunu çağır
+            addResizeHandles(metinDiv); // Boyutlandırma tutamaçlarını ekle
+
+
+            // Metin kutusuna çift tıklandığında düzenleme moduna geç
+            metinDiv.addEventListener('dblclick', () => {
+                metinDiv.focus(); // Odaklan
+            });
+
+            // Metin kutusundan çıkıldığında contentEditable'ı kapat (isteğe bağlı)
+            metinDiv.addEventListener('blur', () => {
+               // metinDiv.contentEditable = false;  // İsterseniz, düzenleme bittiğinde kapatın
+            });
+        }
+
+
+
+        function surukleBirak(element) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+            element.onmousedown = dragMouseDown;
+
+            function dragMouseDown(e) {
+                e = e || window.event;
+
+                // Sadece elementin kendisine tıklandığında sürüklemeyi başlat (tutamaçlara tıklanırsa değil)
+                if (!e.target.classList.contains('resizer')) {
+                    e.preventDefault();
+                    pos3 = e.clientX;
+                    pos4 = e.clientY;
+                    document.onmouseup = closeDragElement;
+                    document.onmousemove = elementDrag;
+                }
+            }
+
+            function elementDrag(e) {
+                e = e || window.event;
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                element.style.top = (element.offsetTop - pos2) + "px";
+                element.style.left = (element.offsetLeft - pos1) + "px";
+
+                // Canvas dışına taşmayı engelle
+                constrainPosition(element);
+
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+
+
+        function addResizeHandles(element) {
+            const corners = ['nw', 'ne', 'sw', 'se'];
+            corners.forEach(corner => {
+                const resizer = document.createElement('div');
+                resizer.classList.add('resizer', corner);
+                element.appendChild(resizer);
+                resizer.addEventListener('mousedown', initResize, false);
+            });
+
+            let startX, startY, startWidth, startHeight;
+
+            function initResize(e) {
+                e.preventDefault(); // Çok önemli!  Sürüklemeyi engellemeyi önler.
+                e.stopPropagation(); // Diğer olayları tetiklemeyi engelle (sürüklemeyi bozabilir)
+
+                startX = e.clientX;
+                startY = e.clientY;
+                startWidth = parseInt(document.defaultView.getComputedStyle(element).width, 10);
+                startHeight = parseInt(document.defaultView.getComputedStyle(element).height, 10);
+                document.documentElement.addEventListener('mousemove', doResize, false);
+                document.documentElement.addEventListener('mouseup', stopResize, false);
+
+                // Hangi köşenin sürüklendiğini belirle
+                const currentResizer = e.target;
+
+
+                function doResize(e) {
+                    e.preventDefault(); // Çok önemli!
+                    if (currentResizer.classList.contains('se')) {
+                        element.style.width = (startWidth + e.clientX - startX) + 'px';
+                        element.style.height = (startHeight + e.clientY - startY) + 'px';
+                    } else if (currentResizer.classList.contains('sw')) {
+                        element.style.width = (startWidth - e.clientX + startX) + 'px';
+                        element.style.height = (startHeight + e.clientY - startY) + 'px';
+                        element.style.left = (element.offsetLeft + e.clientX - startX) + 'px';
+                    } else if (currentResizer.classList.contains('ne')) {
+                        element.style.width = (startWidth + e.clientX - startX) + 'px';
+                        element.style.height = (startHeight - e.clientY + startY) + 'px';
+                        element.style.top = (element.offsetTop + e.clientY - startY) + 'px';
+                    } else if (currentResizer.classList.contains('nw')) {
+                        element.style.width = (startWidth - e.clientX + startX) + 'px';
+                        element.style.height = (startHeight - e.clientY + startY) + 'px';
+                        element.style.top = (element.offsetTop + e.clientY - startY) + 'px';
+                        element.style.left = (element.offsetLeft + e.clientX - startX) + 'px';
+                    }
+                    // Boyutlandırmadan sonra da canvas dışına taşmayı engelle
+                    constrainPosition(element);
+                }
+
+                function stopResize() {
+                    document.documentElement.removeEventListener('mousemove', doResize, false);
+                    document.documentElement.removeEventListener('mouseup', stopResize, false);
+                }
+            }
+        }
+// Çizim olayları
+canvasContainer.addEventListener('mousedown', (e) => {
+            if (aktifArac === 'kaydir') {
+                kaydirmaAktif = true;
+                baslangicX = e.clientX - canvasContainer.offsetLeft;
+                baslangicY = e.clientY - canvasContainer.offsetTop;
+            } else if (!e.target.classList.contains('resizer') && !e.target.closest('.eklenen-resim') && !e.target.closest('.eklenen-metin')) {
+                // Eğer tıklanan yer bir boyutlandırma tutamacı, resim veya metin DEĞİLSE çizime başla
+                baslaCizim(e);
+            }
+        });
+
+canvasContainer.addEventListener('mousemove', (e) => {
+            if (aktifArac === 'kaydir' && kaydirmaAktif) {
+                const x = e.clientX - canvasContainer.offsetLeft;
+                const y = e.clientY - canvasContainer.offsetTop;
+                const kaydirX = x - baslangicX;
+                const kaydirY = y - baslangicY;
+                canvasContainer.scrollLeft -= kaydirX;
+                canvasContainer.scrollTop -= kaydirY;
+                baslangicX = x;
+                baslangicY = y;
+            } else if (cizim) { // Sadece çizim aktifse çiz
+                ciz(e);
+            }
+        });
+
+        canvasContainer.addEventListener('mouseup', () => {
+            if (aktifArac === 'kaydir') {
+                kaydirmaAktif = false;
+            } else {
+                bitirCizim();
+            }
+        });
+        canvasContainer.addEventListener('mouseout', () => {
+            if (aktifArac === 'kaydir') {
+                kaydirmaAktif = false;
+            } else {
+                bitirCizim();
+            }
+        });
+
+        // Geri ve İleri
+        const geriBtn = document.getElementById('geriBtn');
+        const ileriBtn = document.getElementById('ileriBtn');
+        geriBtn.addEventListener('click', geriAl);
+        ileriBtn.addEventListener('click', ileriAl);
+
+        // Ayarlar ve Hesap (Modal)
+        const ayarlarBtn = document.getElementById('ayarlarBtn');
+        const ayarlarModal = document.getElementById('ayarlarModal');
+        const kapatBtn = document.querySelector('.kapat');
+        const hesapBtn = document.getElementById('hesapBtn');
+        const hesapDropdown = document.getElementById('hesapDropdown');
+
+        ayarlarBtn.addEventListener('click', () => {
+            ayarlarModal.style.display = 'block';
+        });
+
+        kapatBtn.addEventListener('click', () => {
+            ayarlarModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target == ayarlarModal) {
+                ayarlarModal.style.display = 'none';
+            }
+        });
+
+        hesapBtn.addEventListener('click', (event) => {
+            if (hesapDropdown.style.display === "block") {
+                hesapDropdown.style.display = "none";
+            } else {
+                hesapDropdown.style.display = "block";
+                paletDropdown.style.display = "none";
+                cetvelDropdown.style.display = "none";
+                boyutDropdown.style.display = 'none';
+            }
+            event.stopPropagation();
+        });
+        // Chat ile ilgili kısım
+        const chatButton = document.getElementById('chatButton');
+        const chatSidebar = document.getElementById('chatSidebar');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendChat = document.getElementById('sendChat');
+        const chatOverlay = document.getElementById('chatOverlay');
+        const closeChatButton = document.getElementById('closeChat');
+
+        chatButton.addEventListener('click', () => {
+            chatSidebar.classList.add('open');
+        });
+
+        // Kapatma butonu
+        closeChatButton.addEventListener('click', () => {
+            chatSidebar.classList.remove('open');
+        });
+        // Overlay'e tıklandığında// Overlay'e tıklandığında da kapat
+        chatOverlay.addEventListener('click', () => {
+            chatSidebar.classList.remove('open');
+        });
+
+
+        sendChat.addEventListener('click', sendChatMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendChatMessage();
+            }
+        });
+
+        function sendChatMessage() {
+            const message = chatInput.value.trim();
+            if (message) {
+                addMessage(message, 'user'); //Mesajı yerel olarak ekle
+                chatInput.value = '';
+
+              // Socket.IO üzerinden mesajı gönder (hem metin hem de gönderen bilgisi ile)
+
+                    socket.emit('chat', { message: message, sender: 'user' });
+
+
+                fetch('/chat', { // /chat endpoint'i aynı kalacak
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    addMessage(data.reply, 'bot');
+
+                    // Socket.IO üzerinden bot mesajını gönder
+                     socket.emit('chat',{ message: data.reply, sender: 'bot' });
+
+                })
+                .catch(error => {
+                    console.error('Chat error:', error);
+                    const errorMessage = 'Üzgünüm, bir hata oluştu.';
+                    addMessage(errorMessage, 'bot');
+                     // Socket.IO üzerinden hata mesajını gönder
+
+                    socket.emit('chat', { message: errorMessage, sender: 'bot' });
+
+                });
+            }
+        }
+
+        function addMessage(message, sender) {
+            const messageElement = document.createElement('p');
+            messageElement.textContent = message;
+            messageElement.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight; // En alta kaydır
+        }
+
+    });
+
+</script>
+</body>
+</html>
