@@ -7,13 +7,19 @@
         "dev": "nodemon server.js"
     },
     "dependencies": {
+        "ansi-escapes": "^7.0.0",
+        "axios": "^1.7.9",
         "bcrypt": "^5.1.1",
+        "chalk": "4.1.2",
+        "dotenv": "^16.4.7",
         "express": "^4.21.2",
-        "jsonwebtoken": "^9.0.2",
-        "mongoose": "^8.9.6",
+        "express-session": "^1.18.1",
+        "http": "^0.0.1-security",
+        "mongoose": "^8.9.7",
+        "msgpack-lite": "^0.1.26",
         "nodemailer": "^6.10.0",
-        "path": "^0.12.7",
-        "socket.io": "^4.8.1"
+        "socket.io": "^4.8.1",
+        "ws": "^8.18.0"
     },
     "devDependencies": {
         "nodemon": "^3.0.1"
